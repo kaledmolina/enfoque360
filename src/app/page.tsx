@@ -11,6 +11,7 @@ import { NewsGrid } from '@/components/public/NewsGrid'
 import { ArticleDetail } from '@/components/public/ArticleDetail'
 import { PublicFooter } from '@/components/public/PublicFooter'
 import AdminPanel from '@/components/admin/AdminPanel'
+import SetupScreen from '@/components/admin/SetupScreen'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -208,29 +209,6 @@ function LoginModal({
               'Iniciar Sesión'
             )}
           </Button>
-
-          <Separator className="my-2" />
-
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Cuentas de prueba:</p>
-            <div className="grid gap-2">
-              <div className="rounded-md border bg-muted/30 p-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Admin</span>
-                  <Badge variant="destructive" className="text-[9px] px-1">ADMIN</Badge>
-                </div>
-                <span className="text-muted-foreground">admin@newsportal.com</span>
-              </div>
-              <div className="rounded-md border bg-muted/30 p-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Redactor</span>
-                  <Badge variant="secondary" className="text-[9px] px-1">WRITER</Badge>
-                </div>
-                <span className="text-muted-foreground">maria@newsportal.com</span>
-              </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground">Contraseña para todas: la misma del email usuario</p>
-          </div>
         </form>
       </DialogContent>
     </Dialog>
@@ -244,6 +222,22 @@ function AppContent() {
   const { data: session, status } = useSession()
   const [loginOpen, setLoginOpen] = useState(false)
   const [view, setView] = useState<'public' | 'admin'>('public')
+  const [needsSetup, setNeedsSetup] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkSetup = async () => {
+      try {
+        const res = await fetch('/api/auth/setup')
+        if (res.ok) {
+          const data = await res.json()
+          setNeedsSetup(data.needsSetup)
+        }
+      } catch (err) {
+        console.error('Failed to check setup status:', err)
+      }
+    }
+    checkSetup()
+  }, [])
 
   const handleLoginClick = useCallback(() => {
     if (session) {
@@ -272,7 +266,7 @@ function AppContent() {
     }
   }, [session, view])
 
-  if (status === 'loading') {
+  if (status === 'loading' || needsSetup === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -281,6 +275,10 @@ function AppContent() {
         </div>
       </div>
     )
+  }
+
+  if (needsSetup) {
+    return <SetupScreen onSetupComplete={() => setNeedsSetup(false)} />
   }
 
   return (
