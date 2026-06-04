@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/users — list all users (ADMIN only)
 export async function GET() {
   try {

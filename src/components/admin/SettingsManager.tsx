@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Save, Loader2, Globe, FileText, Search, LayoutGrid, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Save, Loader2, Globe, FileText, Search, LayoutGrid, ToggleLeft, Image } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 interface SettingField {
   key: string
   label: string
-  type: 'text' | 'textarea' | 'number' | 'boolean'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'image'
   description: string
   icon: React.ReactNode
   group: 'general' | 'seo' | 'display'
@@ -25,57 +25,65 @@ interface SettingField {
 const SETTINGS_FIELDS: SettingField[] = [
   {
     key: 'site_name',
-    label: 'Site Name',
+    label: 'Nombre del Sitio',
     type: 'text',
-    description: 'The name displayed in the browser tab and header',
+    description: 'El nombre que se muestra en la pestaña del navegador y la cabecera',
     icon: <Globe className="h-4 w-4" />,
     group: 'general',
   },
   {
+    key: 'site_logo',
+    label: 'Logo del Sitio',
+    type: 'image',
+    description: 'El logotipo del portal de noticias (se puede subir un archivo)',
+    icon: <Image className="h-4 w-4" />,
+    group: 'general',
+  },
+  {
     key: 'site_description',
-    label: 'Site Description',
+    label: 'Descripción del Sitio',
     type: 'textarea',
-    description: 'A brief description of your news portal',
+    description: 'Una breve descripción de tu portal de noticias',
     icon: <FileText className="h-4 w-4" />,
     group: 'general',
   },
   {
     key: 'seo_title',
-    label: 'SEO Title',
+    label: 'Título SEO',
     type: 'text',
-    description: 'Default title for search engine results',
+    description: 'Título predeterminado para los resultados del motor de búsqueda',
     icon: <Search className="h-4 w-4" />,
     group: 'seo',
   },
   {
     key: 'seo_description',
-    label: 'SEO Description',
+    label: 'Descripción SEO',
     type: 'textarea',
-    description: 'Default meta description for search engines',
+    description: 'Descripción meta predeterminada para motores de búsqueda',
     icon: <Search className="h-4 w-4" />,
     group: 'seo',
   },
   {
     key: 'banner_enabled',
-    label: 'Enable Banner',
+    label: 'Habilitar Banner',
     type: 'boolean',
-    description: 'Show the announcement banner at the top of the site',
+    description: 'Mostrar el banner de anuncio en la parte superior del sitio',
     icon: <ToggleLeft className="h-4 w-4" />,
     group: 'display',
   },
   {
     key: 'banner_text',
-    label: 'Banner Text',
+    label: 'Texto del Banner',
     type: 'text',
-    description: 'Text displayed in the announcement banner',
+    description: 'Texto mostrado en el banner de anuncio',
     icon: <LayoutGrid className="h-4 w-4" />,
     group: 'display',
   },
   {
     key: 'articles_per_page',
-    label: 'Articles Per Page',
+    label: 'Artículos por Página',
     type: 'number',
-    description: 'Number of articles displayed on each page (default: 12)',
+    description: 'Número de artículos que se muestran en cada página (por defecto: 12)',
     icon: <LayoutGrid className="h-4 w-4" />,
     group: 'display',
   },
@@ -84,7 +92,7 @@ const SETTINGS_FIELDS: SettingField[] = [
 const GROUP_LABELS: Record<string, string> = {
   general: 'General',
   seo: 'SEO',
-  display: 'Display',
+  display: 'Visualización',
 }
 
 export default function SettingsManager() {
@@ -92,6 +100,7 @@ export default function SettingsManager() {
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isUploadingMap, setIsUploadingMap] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchSettings().finally(() => setIsLoading(false))
@@ -113,13 +122,42 @@ export default function SettingsManager() {
     setLocalSettings((prev) => ({ ...prev, [key]: checked ? 'true' : 'false' }))
   }
 
+  const handleFileUpload = async (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingMap((prev) => ({ ...prev, [key]: true }))
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        handleSettingChange(key, data.url)
+        toast.success('Logotipo subido correctamente')
+      } else {
+        const errorData = await res.json()
+        toast.error(errorData.error || 'Error al subir el archivo')
+      }
+    } catch (err) {
+      toast.error('Ocurrió un error al subir el archivo')
+    } finally {
+      setIsUploadingMap((prev) => ({ ...prev, [key]: false }))
+    }
+  }
+
   const handleSave = async () => {
     setIsSaving(true)
     const result = await updateSettings(localSettings)
     if (result) {
-      toast.success('Settings saved successfully')
+      toast.success('Configuración guardada correctamente')
     } else {
-      toast.error('Failed to save settings')
+      toast.error('Error al guardar la configuración')
     }
     setIsSaving(false)
   }
@@ -143,8 +181,60 @@ export default function SettingsManager() {
               id={field.key}
               value={value}
               onChange={(e) => handleSettingChange(field.key, e.target.value)}
-              placeholder={`Enter ${field.label.toLowerCase()}...`}
+              placeholder={`Introduce el ${field.label.toLowerCase()}...`}
             />
+            <p className="text-xs text-muted-foreground">{field.description}</p>
+          </div>
+        )
+
+      case 'image':
+        return (
+          <div className="space-y-2" key={field.key}>
+            <Label htmlFor={field.key} className="flex items-center gap-2">
+              {field.icon}
+              {field.label}
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id={field.key}
+                value={value}
+                onChange={(e) => handleSettingChange(field.key, e.target.value)}
+                placeholder={`Introduce la URL del ${field.label.toLowerCase()} o sube un archivo...`}
+              />
+              <div className="relative">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={isUploadingMap[field.key]}
+                  onClick={() => document.getElementById(`upload-${field.key}`)?.click()}
+                >
+                  {isUploadingMap[field.key] ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Subir'
+                  )}
+                </Button>
+                <input
+                  id={`upload-${field.key}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleFileUpload(field.key, e)}
+                />
+              </div>
+            </div>
+            {value && (
+              <div className="mt-2">
+                <img
+                  src={value}
+                  alt={field.label}
+                  className="h-16 object-contain rounded-md border p-1 max-w-[200px]"
+                  onError={(e) => {
+                    ;(e.target as HTMLImageElement).style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">{field.description}</p>
           </div>
         )
@@ -160,7 +250,7 @@ export default function SettingsManager() {
               id={field.key}
               value={value}
               onChange={(e) => handleSettingChange(field.key, e.target.value)}
-              placeholder={`Enter ${field.label.toLowerCase()}...`}
+              placeholder={`Introduce el ${field.label.toLowerCase()}...`}
               rows={3}
             />
             <p className="text-xs text-muted-foreground">{field.description}</p>
@@ -220,21 +310,21 @@ export default function SettingsManager() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Site Settings</h2>
+          <h2 className="text-lg font-semibold">Configuración del Sitio</h2>
           <p className="text-sm text-muted-foreground">
-            Configure your news portal settings
+            Configura los ajustes de tu portal de noticias
           </p>
         </div>
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Saving...
+              Guardando...
             </>
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />
-              Save Settings
+              Guardar Configuración
             </>
           )}
         </Button>
@@ -265,9 +355,9 @@ export default function SettingsManager() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">{GROUP_LABELS[group]}</CardTitle>
                 <CardDescription>
-                  {group === 'general' && 'Basic site configuration'}
-                  {group === 'seo' && 'Search engine optimization settings'}
-                  {group === 'display' && 'Content display and layout options'}
+                  {group === 'general' && 'Configuración básica del sitio'}
+                  {group === 'seo' && 'Configuración de optimización para motores de búsqueda'}
+                  {group === 'display' && 'Opciones de visualización y diseño de contenido'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -285,12 +375,12 @@ export default function SettingsManager() {
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
+                Guardando...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save All Settings
+                Guardar Toda la Configuración
               </>
             )}
           </Button>

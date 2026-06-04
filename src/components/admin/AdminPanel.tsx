@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { Session } from 'next-auth'
+import { useTheme } from 'next-themes'
 import {
   LayoutDashboard,
   FileText,
@@ -15,6 +16,8 @@ import {
   X,
   Shield,
   PenTool,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -53,12 +56,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-  { id: 'articles', label: 'Articles', icon: <FileText className="h-4 w-4" /> },
-  { id: 'users', label: 'Users', icon: <Users className="h-4 w-4" />, adminOnly: true },
-  { id: 'logs', label: 'Activity Logs', icon: <ScrollText className="h-4 w-4" />, adminOnly: true },
-  { id: 'categories', label: 'Categories', icon: <FolderTree className="h-4 w-4" />, adminOnly: true },
-  { id: 'tags', label: 'Tags', icon: <Tags className="h-4 w-4" />, adminOnly: true },
-  { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" />, adminOnly: true },
+  { id: 'articles', label: 'Artículos', icon: <FileText className="h-4 w-4" /> },
+  { id: 'users', label: 'Usuarios', icon: <Users className="h-4 w-4" />, adminOnly: true },
+  { id: 'logs', label: 'Historial de Actividad', icon: <ScrollText className="h-4 w-4" />, adminOnly: true },
+  { id: 'categories', label: 'Categorías', icon: <FolderTree className="h-4 w-4" />, adminOnly: true },
+  { id: 'tags', label: 'Etiquetas', icon: <Tags className="h-4 w-4" />, adminOnly: true },
+  { id: 'settings', label: 'Configuración', icon: <Settings className="h-4 w-4" />, adminOnly: true },
 ]
 
 function SidebarContent({
@@ -84,8 +87,8 @@ function SidebarContent({
           <Shield className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-sm font-bold leading-tight">News Portal</h2>
-          <p className="text-xs text-muted-foreground">Admin Panel</p>
+          <h2 className="text-sm font-bold leading-tight">Portal de Noticias</h2>
+          <p className="text-xs text-muted-foreground">Panel de Control</p>
         </div>
       </div>
 
@@ -135,9 +138,9 @@ function SidebarContent({
               className="text-[10px] px-1.5 py-0"
             >
               {isAdmin ? (
-                <><Shield className="h-3 w-3 mr-0.5" /> Admin</>
+                <><Shield className="h-3 w-3 mr-0.5" /> Administrador</>
               ) : (
-                <><PenTool className="h-3 w-3 mr-0.5" /> Writer</>
+                <><PenTool className="h-3 w-3 mr-0.5" /> Escritor</>
               )}
             </Badge>
           </div>
@@ -150,7 +153,7 @@ function SidebarContent({
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />
-          Sign Out
+          Cerrar Sesión
         </Button>
       </div>
     </div>
@@ -167,6 +170,8 @@ export default function AdminPanel({ session, onLogout }: AdminPanelProps) {
     fetchCategories,
     fetchTags,
   } = useAdminStore()
+
+  const { theme, setTheme } = useTheme()
 
   const isAdmin = session.user.role === 'ADMIN'
 
@@ -216,7 +221,7 @@ export default function AdminPanel({ session, onLogout }: AdminPanelProps) {
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="sr-only">
-            <SheetTitle>Navigation</SheetTitle>
+            <SheetTitle>Navegación</SheetTitle>
           </SheetHeader>
           <SidebarContent
             session={session}
@@ -229,17 +234,31 @@ export default function AdminPanel({ session, onLogout }: AdminPanelProps) {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar for mobile */}
-        <header className="flex items-center gap-4 border-b px-4 py-3 lg:px-6 bg-card">
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-          </Sheet>
-          <h1 className="text-lg font-semibold">{sectionTitle}</h1>
+        {/* Top bar */}
+        <header className="flex items-center justify-between border-b px-4 py-3 lg:px-6 bg-card">
+          <div className="flex items-center gap-4">
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Alternar menú</span>
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+            <h1 className="text-lg font-semibold">{sectionTitle}</h1>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            aria-label="Alternar tema"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5 text-amber-500" />
+            ) : (
+              <Moon className="h-5 w-5 text-indigo-600" />
+            )}
+          </Button>
         </header>
 
         {/* Page Content */}

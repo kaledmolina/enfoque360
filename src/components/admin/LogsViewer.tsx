@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table'
 import { useAdminStore } from '@/store/admin-store'
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 const LOG_ACTIONS = [
   'LOGIN',
@@ -79,7 +80,7 @@ export default function LogsViewer() {
   }
 
   const handleFilterChange = (value: string) => {
-    setLogActionFilter(value === '' ? '' : value)
+    setLogActionFilter(value === 'ALL' ? '' : value)
   }
 
   return (
@@ -87,19 +88,19 @@ export default function LogsViewer() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Activity Logs</h2>
+          <h2 className="text-lg font-semibold">Registros de Actividad</h2>
           <p className="text-sm text-muted-foreground">
-            {logsTotal} total log{logsTotal !== 1 ? 's' : ''}
-            {logActionFilter && ` · filtered by ${logActionFilter.replace(/_/g, ' ')}`}
+            {logsTotal} {logsTotal !== 1 ? 'registros en total' : 'registro en total'}
+            {logActionFilter && ` · filtrado por ${logActionFilter.replace(/_/g, ' ')}`}
           </p>
         </div>
-        <Select value={logActionFilter} onValueChange={handleFilterChange}>
+        <Select value={logActionFilter || 'ALL'} onValueChange={handleFilterChange}>
           <SelectTrigger className="w-full sm:w-[200px]">
             <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="All Actions" />
+            <SelectValue placeholder="Todas las Acciones" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Actions</SelectItem>
+            <SelectItem value="ALL">Todas las Acciones</SelectItem>
             {LOG_ACTIONS.map((action) => (
               <SelectItem key={action} value={action}>
                 {action.replace(/_/g, ' ')}
@@ -130,11 +131,11 @@ export default function LogsViewer() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-6">Action</TableHead>
-                    <TableHead className="hidden sm:table-cell">User</TableHead>
-                    <TableHead className="hidden md:table-cell">Details</TableHead>
-                    <TableHead className="hidden lg:table-cell">IP Address</TableHead>
-                    <TableHead className="pr-6 text-right">Time</TableHead>
+                    <TableHead className="pl-6">Acción</TableHead>
+                    <TableHead className="hidden sm:table-cell">Usuario</TableHead>
+                    <TableHead className="hidden md:table-cell">Detalles</TableHead>
+                    <TableHead className="hidden lg:table-cell">Dirección IP</TableHead>
+                    <TableHead className="pr-6 text-right">Hora</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -160,14 +161,14 @@ export default function LogsViewer() {
                         {log.ipAddress || '—'}
                       </TableCell>
                       <TableCell className="pr-6 text-right text-sm text-muted-foreground whitespace-nowrap">
-                        {format(new Date(log.createdAt), 'MMM d, yyyy HH:mm')}
+                        {format(new Date(log.createdAt), "d 'de' MMM, yyyy HH:mm", { locale: es })}
                       </TableCell>
                     </TableRow>
                   ))}
                   {logs.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                        No logs found.
+                        No se encontraron registros.
                       </TableCell>
                     </TableRow>
                   )}
@@ -182,7 +183,7 @@ export default function LogsViewer() {
       {logsTotalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {logsPage} of {logsTotalPages}
+            Página {logsPage} de {logsTotalPages}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -192,7 +193,7 @@ export default function LogsViewer() {
               disabled={logsPage <= 1}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              Anterior
             </Button>
             <Button
               variant="outline"
@@ -200,7 +201,7 @@ export default function LogsViewer() {
               onClick={() => handlePageChange(logsPage + 1)}
               disabled={logsPage >= logsTotalPages}
             >
-              Next
+              Siguiente
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>

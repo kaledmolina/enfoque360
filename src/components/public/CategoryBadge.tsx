@@ -6,7 +6,7 @@ interface CategoryBadgeProps {
   name: string
   color: string
   slug?: string
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
   className?: string
   size?: 'sm' | 'md'
 }

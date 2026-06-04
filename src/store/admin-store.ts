@@ -210,7 +210,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   settings: {},
   isLoading: false,
   isLoadingArticles: false,
-  articleStatusFilter: '',
+  articleStatusFilter: 'ALL',
   articleSearchQuery: '',
   logActionFilter: '',
 
@@ -251,7 +251,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       if (res.ok) {
         const data = await res.json()
         let filtered = data.articles
-        if (articleStatusFilter) {
+        if (articleStatusFilter && articleStatusFilter !== 'ALL') {
           filtered = filtered.filter((a: Article) => a.status === articleStatusFilter)
         }
         set({ articles: filtered })

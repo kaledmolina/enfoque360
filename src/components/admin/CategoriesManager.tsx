@@ -92,7 +92,7 @@ export default function CategoriesManager() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
-    if (!formName.trim()) newErrors.name = 'Name is required'
+    if (!formName.trim()) newErrors.name = 'El nombre es obligatorio'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -110,10 +110,10 @@ export default function CategoriesManager() {
           order: formOrder,
         })
         if (result) {
-          toast.success('Category updated successfully')
+          toast.success('Categoría actualizada con éxito')
           setDialogOpen(false)
         } else {
-          toast.error('Failed to update category')
+          toast.error('Error al actualizar la categoría')
         }
       } else {
         const result = await createCategory({
@@ -123,14 +123,14 @@ export default function CategoriesManager() {
           order: formOrder,
         })
         if (result) {
-          toast.success('Category created successfully')
+          toast.success('Categoría creada con éxito')
           setDialogOpen(false)
         } else {
-          toast.error('Failed to create category')
+          toast.error('Error al crear la categoría')
         }
       }
     } catch {
-      toast.error('An error occurred')
+      toast.error('Ha ocurrido un error')
     } finally {
       setIsSaving(false)
     }
@@ -141,9 +141,9 @@ export default function CategoriesManager() {
     setIsSaving(true)
     const result = await deleteCategory(deletingCategory.id)
     if (result) {
-      toast.success(`Category "${deletingCategory.name}" deleted`)
+      toast.success(`Categoría "${deletingCategory.name}" eliminada`)
     } else {
-      toast.error('Failed to delete category')
+      toast.error('Error al eliminar la categoría')
     }
     setIsSaving(false)
     setDeleteDialogOpen(false)
@@ -161,14 +161,14 @@ export default function CategoriesManager() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Categories</h2>
+          <h2 className="text-lg font-semibold">Categorías</h2>
           <p className="text-sm text-muted-foreground">
-            {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
+            {categories.length} {categories.length !== 1 ? 'categorías' : 'categoría'}
           </p>
         </div>
         <Button onClick={openCreateDialog} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Category
+          Añadir Categoría
         </Button>
       </div>
 
@@ -195,11 +195,11 @@ export default function CategoriesManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="pl-6 w-[50px]">Color</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">Slug</TableHead>
-                    <TableHead className="hidden md:table-cell">Articles</TableHead>
-                    <TableHead className="hidden lg:table-cell">Order</TableHead>
-                    <TableHead className="pr-6 text-right">Actions</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead className="hidden sm:table-cell">Enlace (Slug)</TableHead>
+                    <TableHead className="hidden md:table-cell">Artículos</TableHead>
+                    <TableHead className="hidden lg:table-cell">Orden</TableHead>
+                    <TableHead className="pr-6 text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -235,7 +235,7 @@ export default function CategoriesManager() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => openEditDialog(category)}
-                            title="Edit"
+                            title="Editar"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -247,7 +247,7 @@ export default function CategoriesManager() {
                               setDeletingCategory(category)
                               setDeleteDialogOpen(true)
                             }}
-                            title="Delete"
+                            title="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -258,7 +258,7 @@ export default function CategoriesManager() {
                   {categories.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                        No categories yet.
+                        Aún no hay categorías creadas.
                       </TableCell>
                     </TableRow>
                   )}
@@ -274,17 +274,17 @@ export default function CategoriesManager() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? 'Edit Category' : 'Create Category'}
+              {editingCategory ? 'Editar Categoría' : 'Crear Categoría'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="cat-name">Name *</Label>
+              <Label htmlFor="cat-name">Nombre *</Label>
               <Input
                 id="cat-name"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Category name"
+                placeholder="Nombre de la categoría"
               />
               {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
               {formName.trim() && (
@@ -295,12 +295,12 @@ export default function CategoriesManager() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cat-desc">Description</Label>
+              <Label htmlFor="cat-desc">Descripción</Label>
               <Textarea
                 id="cat-desc"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Optional description..."
+                placeholder="Descripción opcional..."
                 rows={3}
               />
             </div>
@@ -329,7 +329,7 @@ export default function CategoriesManager() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cat-order">Display Order</Label>
+              <Label htmlFor="cat-order">Orden de Visualización</Label>
               <Input
                 id="cat-order"
                 type="number"
@@ -341,11 +341,11 @@ export default function CategoriesManager() {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {editingCategory ? 'Save Changes' : 'Create Category'}
+                {editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
               </Button>
             </div>
           </div>
@@ -356,21 +356,20 @@ export default function CategoriesManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar Categoría</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{deletingCategory?.name}&quot;? Articles in this
-              category will lose their category assignment.
+              ¿Estás seguro de que deseas eliminar la categoría &quot;{deletingCategory?.name}&quot;? Los artículos de esta categoría perderán su asignación.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isSaving}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Delete
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table'
 import { useAdminStore, type Stats } from '@/store/admin-store'
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import {
   BarChart,
   Bar,
@@ -64,6 +65,19 @@ function getStatusBadgeColor(status: string) {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
     default:
       return ''
+  }
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case 'PUBLISHED':
+      return 'Publicado'
+    case 'PENDING_REVIEW':
+      return 'En Revisión'
+    case 'DRAFT':
+      return 'Borrador'
+    default:
+      return status
   }
 }
 
@@ -110,40 +124,40 @@ function StatsGrid({ stats }: { stats: Stats }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <StatCard
-        title="Total Articles"
+        title="Total de Artículos"
         value={stats.totalArticles}
         icon={<FileText className="h-6 w-6" />}
-        description="All articles in the system"
+        description="Todos los artículos en el sistema"
       />
       <StatCard
-        title="Published"
+        title="Publicados"
         value={stats.publishedArticles}
         icon={<CheckCircle2 className="h-6 w-6" />}
-        description="Live articles"
+        description="Artículos publicados en vivo"
       />
       <StatCard
-        title="Drafts"
+        title="Borradores"
         value={stats.draftArticles}
         icon={<FilePenLine className="h-6 w-6" />}
-        description="Unpublished drafts"
+        description="Borradores sin publicar"
       />
       <StatCard
-        title="Pending Review"
+        title="Pendientes de Revisión"
         value={stats.pendingArticles}
         icon={<Clock className="h-6 w-6" />}
-        description="Awaiting review"
+        description="Esperando revisión"
       />
       <StatCard
-        title="Total Users"
+        title="Total de Usuarios"
         value={stats.totalUsers}
         icon={<Users className="h-6 w-6" />}
-        description="Active users"
+        description="Usuarios activos"
       />
       <StatCard
-        title="Total Views"
+        title="Total de Vistas"
         value={stats.totalViews.toLocaleString()}
         icon={<Eye className="h-6 w-6" />}
-        description="All-time article views"
+        description="Vistas totales de artículos"
       />
     </div>
   )
@@ -173,18 +187,18 @@ function RecentArticles({ stats }: { stats: Stats }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent Articles</CardTitle>
+        <CardTitle className="text-base">Artículos Recientes</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="max-h-96 overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Title</TableHead>
-                <TableHead className="hidden sm:table-cell">Author</TableHead>
-                <TableHead className="hidden md:table-cell">Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="pr-6 text-right">Date</TableHead>
+                <TableHead className="pl-6">Título</TableHead>
+                <TableHead className="hidden sm:table-cell">Autor</TableHead>
+                <TableHead className="hidden md:table-cell">Categoría</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead className="pr-6 text-right">Fecha</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -194,7 +208,7 @@ function RecentArticles({ stats }: { stats: Stats }) {
                     {article.title}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">
-                    {article.author?.name || 'Unknown'}
+                    {article.author?.name || 'Desconocido'}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {article.category?.name ? (
@@ -210,18 +224,18 @@ function RecentArticles({ stats }: { stats: Stats }) {
                       variant={getStatusBadgeVariant(article.status)}
                       className={getStatusBadgeColor(article.status)}
                     >
-                      {article.status === 'PENDING_REVIEW' ? 'Pending' : article.status}
+                      {getStatusLabel(article.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="pr-6 text-right text-muted-foreground text-xs whitespace-nowrap">
-                    {format(new Date(article.createdAt), 'MMM d, yyyy')}
+                    {format(new Date(article.createdAt), "d 'de' MMM, yyyy", { locale: es })}
                   </TableCell>
                 </TableRow>
               ))}
               {stats.recentArticles.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No articles yet. Start writing!
+                    Aún no hay artículos. ¡Empieza a escribir!
                   </TableCell>
                 </TableRow>
               )}
@@ -246,17 +260,17 @@ function RecentLogs({ stats }: { stats: Stats }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent Activity</CardTitle>
+        <CardTitle className="text-base">Actividad Reciente</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="max-h-96 overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-6">Action</TableHead>
-                <TableHead className="hidden sm:table-cell">User</TableHead>
-                <TableHead className="hidden md:table-cell">Details</TableHead>
-                <TableHead className="pr-6 text-right">Time</TableHead>
+                <TableHead className="pl-6">Acción</TableHead>
+                <TableHead className="hidden sm:table-cell">Usuario</TableHead>
+                <TableHead className="hidden md:table-cell">Detalles</TableHead>
+                <TableHead className="pr-6 text-right">Hora</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -274,14 +288,14 @@ function RecentLogs({ stats }: { stats: Stats }) {
                     {log.details || '—'}
                   </TableCell>
                   <TableCell className="pr-6 text-right text-xs text-muted-foreground whitespace-nowrap">
-                    {format(new Date(log.createdAt), 'MMM d, HH:mm')}
+                    {format(new Date(log.createdAt), "d 'de' MMM, HH:mm", { locale: es })}
                   </TableCell>
                 </TableRow>
               ))}
               {stats.recentLogs.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    No activity recorded yet.
+                    Aún no se ha registrado actividad.
                   </TableCell>
                 </TableRow>
               )}
@@ -304,7 +318,7 @@ function DashboardCharts({ stats }: { stats: Stats }) {
       {/* Popular Articles Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Popular Articles (Views)</CardTitle>
+          <CardTitle className="text-base">Artículos Populares (Vistas)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 w-full">
@@ -327,7 +341,7 @@ function DashboardCharts({ stats }: { stats: Stats }) {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                No view statistics available yet.
+                Estadísticas de vistas no disponibles aún.
               </div>
             )}
           </div>
@@ -337,7 +351,7 @@ function DashboardCharts({ stats }: { stats: Stats }) {
       {/* Category Breakdown Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Articles per Category</CardTitle>
+          <CardTitle className="text-base">Artículos por Categoría</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-80 w-full flex items-center justify-center">
@@ -365,7 +379,7 @@ function DashboardCharts({ stats }: { stats: Stats }) {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                No categories statistics available yet.
+                Estadísticas de categorías no disponibles aún.
               </div>
             )}
           </div>

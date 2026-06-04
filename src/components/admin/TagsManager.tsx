@@ -51,16 +51,16 @@ export default function TagsManager() {
 
   const handleCreate = async () => {
     if (!tagName.trim()) {
-      setError('Tag name is required')
+      setError('El nombre de la etiqueta es obligatorio')
       return
     }
     setIsSaving(true)
     const result = await createTag(tagName.trim())
     if (result) {
-      toast.success(`Tag "${tagName.trim()}" created`)
+      toast.success(`Etiqueta "${tagName.trim()}" creada`)
       setCreateDialogOpen(false)
     } else {
-      toast.error('Failed to create tag (it may already exist)')
+      toast.error('Error al crear la etiqueta (podría ya existir)')
     }
     setIsSaving(false)
   }
@@ -70,9 +70,9 @@ export default function TagsManager() {
     setIsSaving(true)
     const result = await deleteTag(deletingTag.id)
     if (result) {
-      toast.success(`Tag "${deletingTag.name}" deleted`)
+      toast.success(`Etiqueta "${deletingTag.name}" eliminada`)
     } else {
-      toast.error('Failed to delete tag')
+      toast.error('Error al eliminar la etiqueta')
     }
     setIsSaving(false)
     setDeleteDialogOpen(false)
@@ -84,14 +84,14 @@ export default function TagsManager() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Tags</h2>
+          <h2 className="text-lg font-semibold">Etiquetas</h2>
           <p className="text-sm text-muted-foreground">
-            {tags.length} tag{tags.length !== 1 ? 's' : ''}
+            {tags.length} {tags.length !== 1 ? 'etiquetas' : 'etiqueta'}
           </p>
         </div>
         <Button onClick={openCreateDialog} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Tag
+          Añadir Etiqueta
         </Button>
       </div>
 
@@ -120,7 +120,7 @@ export default function TagsManager() {
                     <div className="min-w-0">
                       <p className="font-medium text-sm truncate">{tag.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {tag.articleCount ?? 0} article{(tag.articleCount ?? 0) !== 1 ? 's' : ''}
+                        {tag.articleCount ?? 0} { (tag.articleCount ?? 0) !== 1 ? 'artículos' : 'artículo' }
                       </p>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export default function TagsManager() {
                       setDeletingTag(tag)
                       setDeleteDialogOpen(true)
                     }}
-                    title="Delete tag"
+                    title="Eliminar etiqueta"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -143,10 +143,10 @@ export default function TagsManager() {
           {tags.length === 0 && (
             <div className="col-span-full text-center py-12 text-muted-foreground">
               <TagIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-              <p>No tags yet.</p>
+              <p>Aún no hay etiquetas.</p>
               <Button variant="outline" size="sm" onClick={openCreateDialog} className="mt-3">
                 <Plus className="h-4 w-4 mr-1" />
-                Create your first tag
+                Crea tu primera etiqueta
               </Button>
             </div>
           )}
@@ -157,11 +157,11 @@ export default function TagsManager() {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Create Tag</DialogTitle>
+            <DialogTitle>Crear Etiqueta</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="tag-name">Tag Name *</Label>
+              <Label htmlFor="tag-name">Nombre de la etiqueta *</Label>
               <Input
                 id="tag-name"
                 value={tagName}
@@ -169,7 +169,7 @@ export default function TagsManager() {
                   setTagName(e.target.value)
                   setError('')
                 }}
-                placeholder="e.g. Technology"
+                placeholder="ej. Tecnología"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleCreate()
                 }}
@@ -178,11 +178,11 @@ export default function TagsManager() {
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleCreate} disabled={isSaving}>
                 {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Create Tag
+                Crear Etiqueta
               </Button>
             </div>
           </div>
@@ -193,21 +193,20 @@ export default function TagsManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Tag</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar Etiqueta</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the tag &quot;{deletingTag?.name}&quot;? It will be removed
-              from all articles using it.
+              ¿Estás seguro de que deseas eliminar la etiqueta &quot;{deletingTag?.name}&quot;? Se quitará de todos los artículos que la utilicen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isSaving}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Delete
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

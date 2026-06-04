@@ -10,6 +10,7 @@ import {
   Filter,
   Loader2,
   ImageOff,
+  ChevronLeft,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,14 +43,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { useAdminStore, type Article } from '@/store/admin-store'
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import ArticleEditor from './ArticleEditor'
 
 interface ArticleManagerProps {
@@ -67,6 +63,19 @@ function getStatusBadgeColor(status: string) {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
     default:
       return ''
+  }
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case 'PUBLISHED':
+      return 'Publicado'
+    case 'PENDING_REVIEW':
+      return 'En Revisión'
+    case 'DRAFT':
+      return 'Borrador'
+    default:
+      return status
   }
 }
 
@@ -98,7 +107,10 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
     : articles.filter((a) => a.authorId === userId)
 
   const filteredArticles = displayedArticles.filter((article) => {
-    const matchesStatus = !articleStatusFilter || article.status === articleStatusFilter
+    const matchesStatus =
+      !articleStatusFilter ||
+      articleStatusFilter === 'ALL' ||
+      article.status === articleStatusFilter
     const matchesSearch =
       !articleSearchQuery ||
       article.title.toLowerCase().includes(articleSearchQuery.toLowerCase())
@@ -137,19 +149,43 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
     }
   }
 
+  if (editorOpen) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => handleEditorClose()}>
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Volver a la lista
+          </Button>
+          <h2 className="text-xl font-bold">
+            {editingArticle ? 'Editar Artículo' : 'Nuevo Artículo'}
+          </h2>
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            <ArticleEditor
+              article={editingArticle}
+              onClose={handleEditorClose}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       {/* Header & Actions */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Articles</h2>
+          <h2 className="text-lg font-semibold">Artículos</h2>
           <p className="text-sm text-muted-foreground">
-            {filteredArticles.length} article{filteredArticles.length !== 1 ? 's' : ''} found
+            {filteredArticles.length} {filteredArticles.length !== 1 ? 'artículos encontrados' : 'artículo encontrado'}
           </p>
         </div>
         <Button onClick={handleCreate} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          New Article
+          Nuevo Artículo
         </Button>
       </div>
 
@@ -160,7 +196,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search articles..."
+                placeholder="Buscar artículos..."
                 value={articleSearchQuery}
                 onChange={(e) => setArticleSearchQuery(e.target.value)}
                 className="pl-9"
@@ -169,13 +205,13 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
             <Select value={articleStatusFilter} onValueChange={setArticleStatusFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder="Todos los Estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
-                <SelectItem value="PUBLISHED">Published</SelectItem>
+                <SelectItem value="ALL">Todos los Estados</SelectItem>
+                <SelectItem value="DRAFT">Borradores</SelectItem>
+                <SelectItem value="PENDING_REVIEW">En Revisión</SelectItem>
+                <SelectItem value="PUBLISHED">Publicados</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -205,13 +241,13 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                 <TableHeader>
                   <TableRow>
                     <TableHead className="pl-6 w-[40px]"></TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead className="hidden sm:table-cell">Author</TableHead>
-                    <TableHead className="hidden md:table-cell">Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden lg:table-cell">Views</TableHead>
-                    <TableHead className="hidden lg:table-cell text-right">Date</TableHead>
-                    <TableHead className="pr-6 text-right">Actions</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead className="hidden sm:table-cell">Autor</TableHead>
+                    <TableHead className="hidden md:table-cell">Categoría</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="hidden lg:table-cell">Vistas</TableHead>
+                    <TableHead className="hidden lg:table-cell text-right">Fecha</TableHead>
+                    <TableHead className="pr-6 text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -238,7 +274,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                           <p className="font-medium truncate">{article.title}</p>
                           {article.isFeatured && (
                             <Badge variant="outline" className="text-[10px] mt-1">
-                              Featured
+                              Destacado
                             </Badge>
                           )}
                         </div>
@@ -252,7 +288,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm text-muted-foreground truncate max-w-[100px]">
-                            {article.author?.name || 'Unknown'}
+                            {article.author?.name || 'Desconocido'}
                           </span>
                         </div>
                       </TableCell>
@@ -270,9 +306,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                           variant="outline"
                           className={`text-xs ${getStatusBadgeColor(article.status)}`}
                         >
-                          {article.status === 'PENDING_REVIEW'
-                            ? 'Pending'
-                            : article.status.charAt(0) + article.status.slice(1).toLowerCase()}
+                          {getStatusLabel(article.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell text-muted-foreground">
@@ -282,7 +316,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                         </div>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell text-right text-sm text-muted-foreground whitespace-nowrap">
-                        {format(new Date(article.createdAt), 'MMM d, yyyy')}
+                        {format(new Date(article.createdAt), "d 'de' MMM, yyyy", { locale: es })}
                       </TableCell>
                       <TableCell className="pr-6">
                         <div className="flex items-center justify-end gap-1">
@@ -291,7 +325,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => handleEdit(article)}
-                            title="Edit"
+                            title="Editar"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -300,7 +334,7 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => handleDeleteClick(article)}
-                            title="Delete"
+                            title="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -313,10 +347,10 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
                       <TableCell colSpan={8} className="text-center py-12">
                         <div className="flex flex-col items-center gap-2">
                           <FileIcon className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">No articles found.</p>
+                          <p className="text-muted-foreground">No se encontraron artículos.</p>
                           <Button variant="outline" size="sm" onClick={handleCreate}>
                             <Plus className="h-4 w-4 mr-1" />
-                            Create your first article
+                            Crea tu primer artículo
                           </Button>
                         </div>
                       </TableCell>
@@ -329,40 +363,24 @@ export default function ArticleManager({ isAdmin, userId }: ArticleManagerProps)
         </CardContent>
       </Card>
 
-      {/* Article Editor Dialog */}
-      <Dialog open={editorOpen} onOpenChange={(open) => !open && handleEditorClose()}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle>
-              {editingArticle ? 'Edit Article' : 'New Article'}
-            </DialogTitle>
-          </DialogHeader>
-          <ArticleEditor
-            article={editingArticle}
-            onClose={handleEditorClose}
-          />
-        </DialogContent>
-      </Dialog>
-
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Article</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar Artículo</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{articleToDelete?.title}&quot;? This action cannot be
-              undone.
+              ¿Estás seguro de que deseas eliminar &quot;{articleToDelete?.title}&quot;? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Delete
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
