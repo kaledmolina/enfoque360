@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { usePublicStore } from '@/store/public-store'
 import { useAdminStore } from '@/store/admin-store'
 import { PublicHeader } from '@/components/public/PublicHeader'
-import { HeroCarousel } from '@/components/public/HeroCarousel'
+import { HeroSection } from '@/components/public/HeroSection'
 import { NewsGrid } from '@/components/public/NewsGrid'
 import { ArticleDetail } from '@/components/public/ArticleDetail'
 import { PublicFooter } from '@/components/public/PublicFooter'
@@ -37,6 +37,8 @@ function PublicPortal({ onLoginClick }: { onLoginClick: () => void }) {
   const fetchSettings = usePublicStore((s) => s.fetchSettings)
   const fetchArticles = usePublicStore((s) => s.fetchArticles)
   const fetchArticle = usePublicStore((s) => s.fetchArticle)
+  const selectedCategory = usePublicStore((s) => s.selectedCategory)
+  const searchQuery = usePublicStore((s) => s.searchQuery)
 
   useEffect(() => {
     fetchCategories()
@@ -49,9 +51,12 @@ function PublicPortal({ onLoginClick }: { onLoginClick: () => void }) {
     }
   }, [currentView, fetchArticles])
 
-  // Get articles for carousel: featured ones first, or fallback to top 4 latest
+  // Get articles for HeroSection: featured ones first, or fallback to top 5 latest
   const featured = articles.filter((a) => a.isFeatured)
-  const carouselArticles = featured.length > 0 ? featured.slice(0, 4) : articles.slice(0, 4)
+  const heroArticles = featured.length > 0 ? featured.slice(0, 5) : articles.slice(0, 5)
+
+  // Show Hero Section only when on the homepage cover (no active category filter or search query)
+  const showHero = currentView === 'home' && !selectedCategory && !searchQuery && heroArticles.length > 0
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -67,10 +72,10 @@ function PublicPortal({ onLoginClick }: { onLoginClick: () => void }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Hero Carousel Banner */}
-              {carouselArticles.length > 0 && (
-                <HeroCarousel
-                  articles={carouselArticles}
+              {/* BBC Style Hero Section */}
+              {showHero && (
+                <HeroSection
+                  articles={heroArticles}
                   onArticleClick={(id) => {
                     fetchArticle(id)
                     window.scrollTo({ top: 0, behavior: 'smooth' })

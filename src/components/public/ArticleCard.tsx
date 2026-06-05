@@ -21,10 +21,10 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-card/50 backdrop-blur-sm card-shadow-hover transition-all duration-300"
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="group cursor-pointer flex flex-col gap-3 pb-6 w-full border-b border-border/10 last:border-b-0"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -36,33 +36,34 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
       }}
     >
       {/* Cover Image */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
         {article.coverImage ? (
           <Image
             src={article.coverImage}
             alt={article.title}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-102"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted/40">
-            <span className="text-xl font-bold text-muted-foreground/30 font-heading">colombiadebate</span>
-          </div>
-        )}
-        {article.category && (
-          <div className="absolute top-3 left-3 z-10">
-            <CategoryBadge
-              name={article.category.name}
-              color={article.category.color}
-            />
+          <div className="flex h-full w-full items-center justify-center bg-secondary/50">
+            <span className="text-sm font-bold text-muted-foreground/30 font-heading">colombiadebate</span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-2.5 p-5">
-        <h3 className="line-clamp-2 text-base font-bold font-heading leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
+      <div className="flex flex-col gap-2">
+        {article.category && (
+          <span 
+            className="text-[10px] font-bold uppercase tracking-wider block"
+            style={{ color: article.category.color }}
+          >
+            {article.category.name}
+          </span>
+        )}
+
+        <h3 className="text-lg font-bold font-heading leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-3">
           {article.title}
         </h3>
 
@@ -71,32 +72,15 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
         </p>
 
         {/* Meta */}
-        <div className="mt-4 flex items-center gap-3 border-t border-border/30 pt-3">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {article.author ? (
-              <>
-                {article.author.avatar ? (
-                  <Image
-                    src={article.author.avatar}
-                    alt={article.author.name}
-                    width={20}
-                    height={20}
-                    className="rounded-full ring-1 ring-border/50"
-                  />
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
-                    <User className="h-2.5 w-2.5" />
-                  </div>
-                )}
-                <span className="font-semibold text-foreground/80 text-[11px]">{article.author.name}</span>
-              </>
-            ) : null}
-          </div>
-          <span className="text-[11px] text-muted-foreground/80">
-            {publishedDate}
-          </span>
-          <div className="ml-auto flex items-center gap-1 text-[11px] text-muted-foreground/80">
-            <Eye className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-1">
+          {article.author && (
+            <span className="font-semibold text-foreground/80">{article.author.name}</span>
+          )}
+          {article.author && publishedDate && <span className="text-muted-foreground/40">•</span>}
+          {publishedDate && <span>{publishedDate}</span>}
+          <span className="text-muted-foreground/40">•</span>
+          <div className="flex items-center gap-0.5">
+            <Eye className="h-3 w-3" />
             <span>{article.views}</span>
           </div>
         </div>

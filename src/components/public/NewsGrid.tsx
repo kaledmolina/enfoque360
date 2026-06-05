@@ -58,6 +58,9 @@ export function NewsGrid() {
     return dateB - dateA
   })
 
+  const isHomepageCover = !selectedCategory && !searchQuery
+  const gridArticles = isHomepageCover ? sortedArticles.slice(5) : sortedArticles
+
   // Loading skeletons
   if (isLoading && articles.length === 0) {
     return (
@@ -118,15 +121,15 @@ export function NewsGrid() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Category Filter Tabs */}
+      {/* Category Filter Tabs (Flat Editorial Style) */}
       {categories.length > 0 && (
-        <div className="mb-10 flex flex-wrap gap-2.5 font-heading">
+        <div className="mb-8 flex flex-wrap border-b border-border/40 font-heading">
           <button
             onClick={() => handleCategorySelect(null)}
-            className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+            className={`px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 border-b-2 -mb-[2px] ${
               selectedCategory === null
-                ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.03]'
-                : 'bg-card border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             Todas
@@ -135,14 +138,14 @@ export function NewsGrid() {
             <button
               key={cat.id}
               onClick={() => handleCategorySelect(cat.slug)}
-              className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+              className={`px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 border-b-2 -mb-[2px] ${
                 selectedCategory === cat.slug
-                  ? 'border-transparent text-white shadow-md'
-                  : 'bg-card border-border/60 text-muted-foreground hover:text-foreground'
+                  ? 'text-foreground font-black'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
               style={
                 selectedCategory === cat.slug
-                  ? { backgroundColor: cat.color, boxShadow: `0 4px 12px -2px ${cat.color}40`, transform: 'scale(1.03)' }
+                  ? { borderBottomColor: cat.color, color: cat.color }
                   : undefined
               }
             >
@@ -154,16 +157,16 @@ export function NewsGrid() {
 
       {/* Search status banner */}
       {searchQuery && (
-        <div className="mb-8 flex items-center justify-between rounded-2xl border border-border/40 bg-muted/30 px-5 py-4 backdrop-blur-sm">
+        <div className="mb-8 flex items-center justify-between border-l-4 border-primary bg-secondary/30 px-5 py-4">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Mostrando resultados de búsqueda para:</span>
-            <span className="font-bold text-foreground font-heading">"{searchQuery}"</span>
+            <span className="text-muted-foreground font-sans">Mostrando resultados de búsqueda para:</span>
+            <span className="font-extrabold text-foreground font-heading">"{searchQuery}"</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => search('')}
-            className="h-8 rounded-full text-xs text-primary hover:bg-primary/10 transition-colors"
+            className="h-8 rounded-none text-xs text-primary hover:bg-primary/5 transition-colors font-bold uppercase tracking-wider"
           >
             Limpiar Búsqueda
           </Button>
@@ -173,22 +176,24 @@ export function NewsGrid() {
       {/* Section header & sorting */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-heading whitespace-nowrap">
+          <h2 className="text-xs font-black uppercase tracking-widest text-foreground font-heading whitespace-nowrap">
             {selectedCategory
               ? categories.find((c) => c.slug === selectedCategory)?.name || 'Últimas'
+              : isHomepageCover
+              ? 'Más noticias'
               : 'Últimas Historias'}
           </h2>
-          <div className="h-px w-full bg-border/40" />
+          <div className="h-[2px] w-full bg-primary/20" />
         </div>
 
         {/* Sorting Controls */}
         <div className="flex items-center gap-2 self-end sm:self-auto font-heading">
           <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-xs text-muted-foreground mr-1">Ordenar:</span>
-          <div className="inline-flex rounded-full bg-muted p-1 border border-border/30">
+          <div className="inline-flex bg-secondary p-0.5 border border-border/20">
             <button
               onClick={() => setSortBy('latest')}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-300 ${
+              className={`px-3 py-1 text-xs font-bold transition-all duration-200 ${
                 sortBy === 'latest'
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -198,7 +203,7 @@ export function NewsGrid() {
             </button>
             <button
               onClick={() => setSortBy('views')}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-300 ${
+              className={`px-3 py-1 text-xs font-bold transition-all duration-200 ${
                 sortBy === 'views'
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -216,14 +221,14 @@ export function NewsGrid() {
         <div className="lg:col-span-8 space-y-8">
           <div className="grid gap-6 sm:grid-cols-2">
             <AnimatePresence mode="popLayout">
-              {sortedArticles.map((article) => (
+              {gridArticles.map((article) => (
                 <motion.div
                   key={article.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <ArticleCard
                     article={article}
@@ -312,9 +317,8 @@ export function NewsGrid() {
         {/* Right Column: Sidebar (4 Cols) */}
         <aside className="lg:col-span-4 space-y-8">
           {/* Top Trends (Popular Articles) */}
-          <div className="rounded-2xl border border-border/40 bg-card/30 p-6 backdrop-blur-sm">
-            <h3 className="mb-5 text-xs font-bold uppercase tracking-widest text-foreground/80 font-heading flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          <div className="border-t-[2px] border-primary pt-4">
+            <h3 className="mb-5 text-xs font-black uppercase tracking-widest text-foreground font-heading">
               Artículos Populares
             </h3>
             

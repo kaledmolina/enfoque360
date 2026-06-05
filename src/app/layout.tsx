@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Outfit, Inter } from "next/font/google";
+import { Lora, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { db } from "@/lib/db";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const inter = Inter({
@@ -55,7 +56,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} ${inter.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${lora.variable} ${inter.variable} font-sans antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <ThemeProvider

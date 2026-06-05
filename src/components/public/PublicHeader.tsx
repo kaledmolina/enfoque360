@@ -64,96 +64,111 @@ export function PublicHeader({ onLoginClick }: PublicHeaderProps) {
     [selectCategory]
   )
 
-  return (
-    <header className="sticky top-0 z-40 w-full glass-panel transition-all duration-300">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
-        <button
-          onClick={() => {
-            setView('home')
-            handleCategoryClick(null)
-          }}
-          className="flex items-center gap-2 text-xl font-extrabold tracking-tight font-heading"
-        >
-          {isSettingsLoading ? (
-            <div className="flex h-8 items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-xs text-muted-foreground font-normal">Cargando...</span>
-            </div>
-          ) : siteLogo ? (
-            <img src={siteLogo} alt={siteName} className="h-10 max-w-[200px] object-contain w-auto transition-transform duration-300 hover:scale-105" />
-          ) : (
-            <div className="flex items-center gap-1.5 group">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-serif font-black shadow-md shadow-primary/20 transition-transform duration-300 group-hover:scale-110">
-                {firstLetter}
-              </div>
-              <span className="hidden sm:inline text-gradient-primary">{restOfName}</span>
-            </div>
-          )}
-        </button>
+  // Split name for block representation
+  const blockLetters = siteName.substring(0, 3).toUpperCase().padEnd(3, 'N').split('')
 
-        {/* Desktop Nav */}
-        <nav className="hidden items-center gap-2 lg:flex font-heading" aria-label="Main navigation">
+  return (
+    <header className="w-full flex flex-col border-b border-border/80">
+      {/* 1. BBC-style Top Black Bar */}
+      <div className="w-full bg-black text-white py-2">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-9">
+          {/* Logo Blocks */}
           <button
-            onClick={() => handleCategoryClick(null)}
-            className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-full hover:bg-primary/5 ${
-              selectedCategory === null
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+            onClick={() => {
+              setView('home')
+              handleCategoryClick(null)
+            }}
+            className="flex items-center gap-1.5"
           >
-            Todas
-            {selectedCategory === null && (
-              <motion.div
-                layoutId="activeCategory"
-                className="absolute bottom-1 left-4 right-4 h-0.5 bg-primary rounded-full"
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
+            {blockLetters.map((char, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white text-black font-black text-xs w-6 h-6 flex items-center justify-center rounded-sm transition-transform hover:scale-110"
+                style={{ fontFamily: 'monospace' }}
+              >
+                {char}
+              </div>
+            ))}
           </button>
-          {categories.map((cat) => (
+
+          {/* Top Right Action Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLoginClick}
+            className="text-white hover:bg-white/10 hover:text-white h-7 text-xs font-semibold gap-1 rounded-sm"
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            <span>Iniciar Sesión</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* 2. BBC-style Red Brand Bar */}
+      <div className="w-full bg-primary text-white py-3">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <button
+            onClick={() => {
+              setView('home')
+              handleCategoryClick(null)
+            }}
+            className="text-left"
+          >
+            <h1 className="text-2xl font-black font-heading tracking-wide flex items-center gap-2">
+              <span>NEWS</span>
+              <span className="font-light text-white/80">{siteName.toUpperCase()}</span>
+            </h1>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. BBC-style Navigation Categories */}
+      <div className="w-full bg-card border-b border-border/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <nav className="flex items-center flex-wrap" aria-label="Main navigation">
             <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat.slug)}
-              className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-full hover:bg-primary/5 ${
-                selectedCategory === cat.slug
-                  ? 'text-foreground'
+              onClick={() => handleCategoryClick(null)}
+              className={`px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-r border-border/30 hover:bg-secondary/50 ${
+                selectedCategory === null
+                  ? 'text-primary bg-secondary/35 border-b-2 border-b-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              style={selectedCategory === cat.slug ? { color: cat.color } : undefined}
             >
-              {cat.name}
-              {selectedCategory === cat.slug && (
-                <motion.div
-                  layoutId="activeCategory"
-                  className="absolute bottom-1 left-4 right-4 h-0.5 rounded-full"
-                  style={{ backgroundColor: cat.color }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
+              Portada
             </button>
-          ))}
-        </nav>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.slug)}
+                className={`px-4 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-r border-border/30 hover:bg-secondary/50 ${
+                  selectedCategory === cat.slug
+                    ? 'text-primary bg-secondary/35 border-b-2 border-b-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                style={selectedCategory === cat.slug ? { borderBottomColor: cat.color, color: cat.color } : undefined}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </nav>
 
-        {/* Desktop Actions */}
-        <div className="flex items-center gap-1">
           {/* Desktop Search Toggle */}
-          <div className="relative hidden sm:block">
+          <div className="relative py-2 flex items-center">
             <AnimatePresence>
               {searchOpen && (
                 <motion.form
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 220, opacity: 1 }}
+                  animate={{ width: 200, opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.2 }}
                   onSubmit={handleDesktopSearch}
-                  className="absolute right-0 top-1/2 -translate-y-1/2"
+                  className="relative z-10"
                 >
                   <Input
                     name="search"
                     type="search"
-                    placeholder="Buscar artículos..."
-                    className="h-8 w-full rounded-full border-border bg-secondary pl-3 pr-8 text-sm"
+                    placeholder="Buscar..."
+                    className="h-8 w-full rounded-sm border-border pl-3 pr-8 text-xs bg-card"
                     autoFocus
                   />
                   <button
@@ -161,7 +176,7 @@ export function PublicHeader({ onLoginClick }: PublicHeaderProps) {
                     onClick={() => setSearchOpen(false)}
                     className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-3 w-3" />
                   </button>
                 </motion.form>
               )}
@@ -171,43 +186,27 @@ export function PublicHeader({ onLoginClick }: PublicHeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearchOpen(true)}
-                className="h-8 w-8"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 aria-label="Open search"
               >
                 <Search className="h-4 w-4" />
               </Button>
             )}
+
+            {/* Theme Toggle */}
+            {mounted && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground ml-1"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            )}
           </div>
 
-          {/* Theme Toggle */}
-          {mounted && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-8 w-8"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-
-          {/* Login Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onLoginClick}
-            className="hidden h-8 w-8 sm:flex"
-            aria-label="Login"
-          >
-            <LogIn className="h-4 w-4" />
-          </Button>
-
-          {/* Mobile Hamburger */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden" aria-label="Open menu">

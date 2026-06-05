@@ -2,115 +2,157 @@
 
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { User, Clock } from 'lucide-react'
+import { Eye, User } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Article } from '@/store/public-store'
-import { CategoryBadge } from './CategoryBadge'
 
 interface HeroSectionProps {
-  article: Article
-  onClick: () => void
+  articles: Article[]
+  onArticleClick: (id: string) => void
 }
 
-export function HeroSection({ article, onClick }: HeroSectionProps) {
-  const publishedDate = article.publishedAt
-    ? format(new Date(article.publishedAt), "d 'de' MMMM, yyyy", { locale: es })
-    : ''
+export function HeroSection({ articles, onArticleClick }: HeroSectionProps) {
+  if (!articles || articles.length === 0) return null
+
+  const leadArticle = articles[0]
+  const secondaryArticles = articles.slice(1, 5) // Next 4 articles
+
+  const formatPublishDate = (dateStr: string | null) => {
+    if (!dateStr) return ''
+    return format(new Date(dateStr), "d 'de' MMM, yyyy", { locale: es })
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative cursor-pointer overflow-hidden rounded-3xl group shadow-xl border border-border/50"
-        onClick={onClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onClick()
-          }
-        }}
-      >
-        <div className="relative aspect-[16/10] w-full sm:aspect-[21/9] md:aspect-[21/8] lg:aspect-[21/7]">
-          {article.coverImage ? (
-            <Image
-              src={article.coverImage}
-              alt={article.title}
-              fill
-              priority
-              className="object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
-              sizes="100vw"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-accent/15">
-              <span className="text-6xl font-black font-heading text-primary/20">colombiadebate</span>
-            </div>
-          )}
-
-          {/* Vignette Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/30 to-black/10 sm:bg-gradient-to-r sm:from-black/80 sm:via-black/40 sm:to-transparent" />
-
-          {/* Floating Glassmorphism Content Card */}
-          <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="max-w-2xl rounded-2xl border border-white/10 bg-black/40 p-5 backdrop-blur-md text-white shadow-2xl sm:p-8"
-            >
-              {article.category && (
-                <div className="mb-3">
-                  <CategoryBadge
-                    name={article.category.name}
-                    color={article.category.color}
-                    size="md"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+    <div className="w-full bg-background border-b border-border/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* 1. Lead Article (60% / 8 columns) */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-8 flex flex-col gap-4 group cursor-pointer"
+            onClick={() => onArticleClick(leadArticle.id)}
+          >
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+              {leadArticle.coverImage ? (
+                <Image
+                  src={leadArticle.coverImage}
+                  alt={leadArticle.title}
+                  fill
+                  priority
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-102"
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-secondary/50">
+                  <span className="text-2xl font-black font-heading text-muted-foreground/30">colombiadebate</span>
                 </div>
               )}
+            </div>
 
-              <h1 className="mb-3 text-xl font-bold leading-tight tracking-tight font-heading sm:text-2xl md:text-3xl lg:text-4xl text-white group-hover:text-primary-foreground/90 transition-colors">
-                {article.title}
-              </h1>
+            <div className="flex flex-col gap-2.5">
+              {leadArticle.category && (
+                <span 
+                  className="text-xs font-black uppercase tracking-widest"
+                  style={{ color: leadArticle.category.color }}
+                >
+                  {leadArticle.category.name}
+                </span>
+              )}
 
-              <p className="mb-5 line-clamp-2 text-xs leading-relaxed text-white/80 sm:text-sm md:text-base">
-                {article.excerpt}
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-heading leading-tight tracking-tight text-foreground group-hover:text-primary transition-colors">
+                {leadArticle.title}
+              </h2>
+
+              <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
+                {leadArticle.excerpt}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-white/70">
-                {article.author && (
-                  <div className="flex items-center gap-2">
-                    {article.author.avatar ? (
-                      <Image
-                        src={article.author.avatar}
-                        alt={article.author.name}
-                        width={28}
-                        height={28}
-                        className="rounded-full ring-2 ring-white/30"
-                      />
-                    ) : (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
-                        <User className="h-3.5 w-3.5 text-white/80" />
-                      </div>
-                    )}
-                    <span className="font-semibold text-white">{article.author.name}</span>
-                  </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+                {leadArticle.author && (
+                  <span className="font-semibold text-foreground/85">{leadArticle.author.name}</span>
                 )}
-                {publishedDate && (
-                  <div className="flex items-center gap-1.5 text-white/60">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{publishedDate}</span>
-                  </div>
-                )}
+                {leadArticle.author && leadArticle.publishedAt && <span className="text-muted-foreground/30">•</span>}
+                {leadArticle.publishedAt && <span>{formatPublishDate(leadArticle.publishedAt)}</span>}
+                <span className="text-muted-foreground/30">•</span>
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>{leadArticle.views} visitas</span>
+                </div>
               </div>
-            </motion.div>
+            </div>
+          </motion.div>
+
+          {/* 2. Secondary Stack (40% / 4 columns) */}
+          <div className="lg:col-span-4 flex flex-col gap-5">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/90 border-b border-border/30 pb-2">
+              Destacados
+            </h3>
+            
+            <div className="flex flex-col gap-5 divide-y divide-border/20">
+              {secondaryArticles.map((art, index) => {
+                const dateText = formatPublishDate(art.publishedAt)
+                return (
+                  <motion.div
+                    key={art.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.08 }}
+                    className="flex gap-4 pt-4 first:pt-0 group cursor-pointer"
+                    onClick={() => onArticleClick(art.id)}
+                  >
+                    {/* Secondary Thumbnail */}
+                    <div className="relative aspect-[4/3] w-28 sm:w-32 flex-shrink-0 overflow-hidden bg-muted">
+                      {art.coverImage ? (
+                        <Image
+                          src={art.coverImage}
+                          alt={art.title}
+                          fill
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-103"
+                          sizes="150px"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-secondary/30">
+                          <span className="text-[10px] font-bold text-muted-foreground/30">Noticia</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Secondary Text */}
+                    <div className="flex flex-col gap-1 justify-center">
+                      {art.category && (
+                        <span 
+                          className="text-[9px] font-bold uppercase tracking-wider"
+                          style={{ color: art.category.color }}
+                        >
+                          {art.category.name}
+                        </span>
+                      )}
+                      
+                      <h4 className="text-sm font-bold font-heading leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-3">
+                        {art.title}
+                      </h4>
+
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground pt-0.5">
+                        {dateText && <span>{dateText}</span>}
+                        {dateText && <span className="text-muted-foreground/30">•</span>}
+                        <div className="flex items-center gap-0.5">
+                          <Eye className="h-3 w-3" />
+                          <span>{art.views}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
+
         </div>
-      </motion.section>
+      </div>
     </div>
   )
 }
