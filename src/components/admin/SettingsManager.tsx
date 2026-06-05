@@ -35,7 +35,7 @@ const SETTINGS_FIELDS: SettingField[] = [
     key: 'site_logo',
     label: 'Logo del Sitio',
     type: 'image',
-    description: 'El logotipo del portal de noticias (se puede subir un archivo)',
+    description: 'El logotipo del portal de noticias. Recomendado: formato PNG transparente o SVG (dimensión ideal 150x40px).',
     icon: <Image className="h-4 w-4" />,
     group: 'general',
   },
@@ -43,7 +43,7 @@ const SETTINGS_FIELDS: SettingField[] = [
     key: 'site_favicon',
     label: 'Icono del Sitio (Favicon)',
     type: 'image',
-    description: 'El icono de la pestaña del navegador (favicon, preferiblemente .ico, .png o .svg)',
+    description: 'El icono de la pestaña del navegador. Recomendado: formato PNG o ICO cuadrado y transparente (ej. 32x32px).',
     icon: <Globe className="h-4 w-4" />,
     group: 'general',
   },
@@ -242,6 +242,16 @@ export default function SettingsManager() {
                   }}
                 />
               </div>
+            )}
+            {field.key === 'site_logo' && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                ⚠️ Importante: Sube el logo en formato PNG con fondo transparente (o archivo SVG). Evita usar imágenes con fondo blanco sólido para que no dañe la estética de la cabecera en modo oscuro.
+              </p>
+            )}
+            {field.key === 'site_favicon' && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                ⚠️ Importante: Sube un icono cuadrado (1:1) en formato PNG o ICO con fondo transparente para las pestañas del navegador.
+              </p>
             )}
             <p className="text-xs text-muted-foreground">{field.description}</p>
           </div>
