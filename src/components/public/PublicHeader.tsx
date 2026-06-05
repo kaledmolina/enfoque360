@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useMounted } from '@/hooks/use-mounted'
-import { Menu, Moon, Sun, Search, X, LogIn } from 'lucide-react'
+import { Menu, Moon, Sun, Search, X, LogIn, Loader2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@/components/ui/input'
@@ -29,6 +29,7 @@ export function PublicHeader({ onLoginClick }: PublicHeaderProps) {
   const setView = usePublicStore((s) => s.setView)
   
   const settings = usePublicStore((s) => s.settings || {})
+  const isSettingsLoading = Object.keys(settings).length === 0
   const siteName = settings.site_name || 'NewsPortal'
   const siteLogo = settings.site_logo
 
@@ -74,7 +75,12 @@ export function PublicHeader({ onLoginClick }: PublicHeaderProps) {
           }}
           className="flex items-center gap-2 text-lg font-extrabold tracking-tight"
         >
-          {siteLogo ? (
+          {isSettingsLoading ? (
+            <div className="flex h-8 items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-normal">Cargando...</span>
+            </div>
+          ) : siteLogo ? (
             <img src={siteLogo} alt={siteName} className="h-12 max-w-[200px] object-contain w-auto" />
           ) : (
             <>
