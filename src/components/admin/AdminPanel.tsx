@@ -77,17 +77,28 @@ function SidebarContent({
 }) {
   const isAdmin = session.user.role === 'ADMIN'
 
+  const settings = useAdminStore((s) => s.settings || {})
+  const siteName = settings.site_name || 'Portal de Noticias'
+  const siteLogo = settings.site_logo
+  const siteFavicon = settings.site_favicon
+
   const filteredItems = navItems.filter((item) => !item.adminOnly || isAdmin)
 
   return (
     <div className="flex h-full flex-col">
       {/* Logo / Brand */}
       <div className="flex items-center gap-3 px-4 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Shield className="h-5 w-5" />
-        </div>
-        <div>
-          <h2 className="text-sm font-bold leading-tight">Portal de Noticias</h2>
+        {siteLogo ? (
+          <img src={siteLogo} alt={siteName} className="h-9 max-w-[150px] object-contain rounded-sm" />
+        ) : siteFavicon ? (
+          <img src={siteFavicon} alt={siteName} className="h-9 w-9 object-contain rounded-sm" />
+        ) : (
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Shield className="h-5 w-5" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-bold leading-tight truncate">{siteName}</h2>
           <p className="text-xs text-muted-foreground">Panel de Control</p>
         </div>
       </div>
@@ -169,6 +180,7 @@ export default function AdminPanel({ session, onLogout }: AdminPanelProps) {
     fetchStats,
     fetchCategories,
     fetchTags,
+    fetchSettings,
   } = useAdminStore()
 
   const { theme, setTheme } = useTheme()
@@ -180,7 +192,8 @@ export default function AdminPanel({ session, onLogout }: AdminPanelProps) {
     fetchStats()
     fetchCategories()
     fetchTags()
-  }, [fetchStats, fetchCategories, fetchTags])
+    fetchSettings()
+  }, [fetchStats, fetchCategories, fetchTags, fetchSettings])
 
   const renderContent = () => {
     switch (activeSection) {
